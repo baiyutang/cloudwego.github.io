@@ -1,11 +1,12 @@
 ---
 title: "连接类型"
-date: 2021-09-28
-weight: 5
-description: >
+date: 2023-10-16
+weight: 4
+keywords: ["Kitex", "短连接", "长连接", "连接多路复用"]
+description: "Kitex 支持短连接、长连接池、连接多路复用以及连接池状态监控。"
 ---
 
-Kitex 支持短连接、长连接池、连接多路复用，用户可以根据自己的业务场景来选择。>= v0.0.2 默认配置了连接池，但建议用户还是根据实际情况调整连接池的大小。
+用户可以根据自己的业务场景来选择短连接、长连接池、连接多路复用。Kitex 自 v0.0.2 版本默认配置了连接池，但建议用户还是根据实际情况调整连接池的大小。
 
 ## 短连接
 
@@ -17,7 +18,7 @@ Kitex 支持短连接、长连接池、连接多路复用，用户可以根据�
 xxxCli := xxxservice.NewClient("destServiceName", client.WithShortConnection())
 ```
 
-## 长连接池
+## 长连接池（默认）
 
 Kitex >= v0.0.2 默认配置了连接池，配置参数如下：
 
@@ -40,44 +41,52 @@ xxxCli := xxxservice.NewClient("destServiceName", client.WithLongConnection(conn
 
 - `MaxIdlePerAddress` 表示每个后端实例可允许的最大闲置连接数
 - `MaxIdleGlobal` 表示全局最大闲置连接数
+  - 从 v0.7.2 开始, 如果未设置 `MaxIdleGlobal`，默认没有限制.
 - `MaxIdleTimeout` 表示连接的闲置时长，超过这个时长的连接会被关闭（最小值 3s，默认值 30s ）
 - `MinIdlePerAddress`(Kitex >= v0.4.3)
   - 表示对每个后端实例维护的最小空闲连接数，这部分连接即使空闲时间超过 `MaxIdleTimeout` 也不会被清理。
   - 当前版本的`MinIdlePerAddress`的值不能超过5。
+
 ### 实现
 
-长连接池的实现方案是每个 address 对应一个连接池，这个连接池是一个由连接构成的 ring，ring 的大小为 MaxIdlePerAddress。
+长连接池的实现方案是每个 address 对应一个连接池，池的大小为 `MaxIdlePerAddress`。
 
 当选择好目标地址并需要获取一个连接时，按以下步骤处理 :
 
-1. 首先尝试从这个 ring 中获取，如果获取失败（没有空闲连接），则发起新的连接建立请求，即连接数量可能会超过 MaxIdlePerAddress
-2. 如果从 ring 中获取成功，则检查该连接的空闲时间（自上次放入连接池后）是否超过了 MaxIdleTimeout，如果超过则关闭该连接并新建
+1. 首先尝试从连接池中获取，如果获取失败(没有空闲连接)，则发起新的连接建立请求，即连接数量可能会超过 `MaxIdlePerAddress`
+2. 如果获取成功，则检查该连接的空闲时间(自上次放入连接池后)是否超过了 `MaxIdleTimeout`, 如果超过则关闭该连接并新建
 3. 全部成功后返回给上层使用
 
 在连接使用完毕准备归还时，按以下步骤依次处理：
 
 1. 检查连接是否正常，如果不正常则直接关闭
-2. 查看空闲连接是否超过全局的 MaxIdleGlobal，如果超过则直接关闭
-3. 待归还到的连接池的 ring 中是否还有空闲空间，如果有则直接放入，否则直接关闭
+2. 查看空闲连接是否超过全局的 `MaxIdleGlobal`，如果超过则直接关闭
+3. 待归还到的连接池是否还有空闲空间，如果有则直接放入，否则直接关闭
 
 ### 参数设置建议
 
 下面是参数设置的一些建议：
 
 - `MaxIdlePerAddress` 表示池化的连接数量，最小为 1，否则长连接会退化为短连接
-    - 具体的值与每个目标地址的吞吐量有关，近似的估算公式为：`MaxIdlePerAddress = qps_per_dest_host*avg_response_time_sec `
-    - 举例如下，假设每个请求的响应时间为 100ms，平摊到每个下游地址的请求为 100QPS，该值建议设置为10，因为每条连接每秒可以处理 10 个请求, 100QPS 则需要 10 个连接进行处理
-    - 在实际场景中，也需要考虑到流量的波动。需要特别注意的是，即 MaxIdleTimeout 内该连接没有被使用则会被回收
-    - 总而言之，该值设置过大或者过小，都会导致连接复用率低，长连接退化为短连接
+  - 具体的值与每个目标地址的吞吐量有关，近似的估算公式为：`MaxIdlePerAddress = qps_per_dest_host*avg_response_time_sec `
+  - 举例如下，假设每个请求的响应时间为 100ms，平摊到每个下游地址的请求为 100QPS，该值建议设置为10，因为每条连接每秒可以处理 10 个请求, 100QPS 则需要 10 个连接进行处理
+  - 在实际场景中，也需要考虑到流量的波动。需要特别注意的是，即 MaxIdleTimeout 内该连接没有被使用则会被回收
+  - 总而言之，该值设置过大或者过小，都会导致连接复用率低，长连接退化为短连接
 - `MinIdlePerAddress`
   - 假设有周期性请求的场景，且周期大于 MaxIdleTimeout，设置此参数可避免每次新建连接。
   - 与 MaxIdlePerAddress 类似，可根据请求的响应时间和 qps 进行设置。
   - 以最大值5个连接为例，假设每个请求的响应时间为100ms，在不新建连接的情况下可以处理 50QPS。
 - `MaxIdleGlobal` 表示总的空闲连接数应大于 `下游目标总数*MaxIdlePerAddress`，超出部分是为了限制未能从连接池中获取连接而主动新建连接的总数量
-    - 注意：该值存在的价值不大，建议设置为一个较大的值，在后续版本中考虑废弃该参数并提供新的接口
+  - 注意：该值存在的价值不大，建议设置为一个较大的值，在后续版本中考虑废弃该参数并提供新的接口
 - `MaxIdleTimeout` 表示连接空闲时间，由于 server 在 10min 内会清理不活跃的连接，因此 client 端也需要及时清理空闲较久的连接，避免使用无效的连接，该值在下游也为 Kitex 时不可超过 10min
 
 ## 连接多路复用
+
+> **⚠️ 已废弃**
+>
+> - `WithMuxConnection` 和 `WithMuxTransport` 所依赖的 [`netpollmux`](https://github.com/cloudwego/kitex/pull/1933) 不再维护
+> - 连接多路复用在极限测试场景下性能收益显著，但在真实业务场景中，由于吞吐量通常不高，收益有限；综合考虑维护成本，决定废弃不再迭代
+> - 服务端需要先启用此功能，否则使用不当可能导致请求失败
 
 开启连接多路复用，Client 访问 Server 常规只需要**1个连接**即可，相比连接池极限测试吞吐表现更好（目前的极限测试配置了2个连接），且能大大减少连接数量。
 
@@ -102,7 +111,6 @@ xxxCli := xxxservice.NewClient("destServiceName", client.WithLongConnection(conn
   ```go
   xxxCli := NewClient("destServiceName", client.WithMuxConnection(1))
   ```
-
 
 ## 状态监控
 

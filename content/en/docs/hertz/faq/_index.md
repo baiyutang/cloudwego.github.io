@@ -2,7 +2,14 @@
 title: "FAQ"
 linkTitle: "FAQ"
 weight: 4
-description: >
+keywords:
+  [
+    "Memory Usage",
+    "Common Error Code",
+    "Context Guide",
+    "Numeric Precision Problem",
+  ]
+description: "Hertz FAQ."
 ---
 
 ## High Memory Usage
@@ -28,6 +35,10 @@ For very vast requests cases, use a combination of streaming and go net.
 
 If the framework reports the following error codes, you can check it for possible causes. If there is an error code other than the following, the error code is not caused by the framework and needs to be located by the user to see whether it is set by itself or by some middleware.
 
+### 403
+
+This status code is returned only when the `fs` feature is enabled and a directory index is accessed without permission. Hertz does not return `403` in other scenarios.
+
 ### 404
 
 1. Access to the wrong port, commonly access to the debug port.
@@ -36,9 +47,17 @@ If the framework reports the following error codes, you can check it for possibl
    1. Check whether all expected routes are registered correctly based on the startup log.
    2. Check that the access method is correct.
 
+### 413
+
+The request body sent by the client exceeds the maximum size configured by [`WithMaxRequestBodySize`](../reference/config.md) on the server side. The default limit is 4 MB.
+
 ### 417
 
 The server returns `false` after executing the custom `ContinueHandler` (the server actively rejects the subsequent body of the 100 Continue).
+
+### 431
+
+The request header sent by the client exceeds the maximum size configured by [`WithMaxHeaderBytes`](../reference/config.md) on the server side. The default limit is 1 MB.
 
 ### 500
 
@@ -67,3 +86,86 @@ The `ctx` is primarily used to store request-level variables, which are recycled
 `c` is passed as the context between middleware `/handler`. With all the semantics of `context.Content` and safe coroutine. All that requires the `context.Content` interface as input arguments, just pass `c` directly.
 
 In addition, Hertz also provides the `ctx.Copy()` interface to make it easier for businesses to obtain a copy of the safe coroutine if they are faced with cases where they must pass `ctx` asynchronously.
+
+## Numeric Precision Problem
+
+### Description
+
+1. JavaScript's numeric type will lose precision once the number exceeds the limit, which will lead to inconsistencies between the front and back end values.
+
+```javascript
+var s = '{"x":6855337641038665531}';
+var obj = JSON.parse(s);
+alert(obj.x);
+
+// Output 6855337641038666000
+```
+
+2. In the JSON specification, integers and floating-point types are not distinguished for numeric types.When using `json.Unmarshal` for JSON deserialization, if no data type is specified, `interface{}` is used as the receiving variable, and `float64` is used as the accepted type of the number by default. When the precision of the number exceedsWhen the precision range that float can represent, it will cause the problem of loss of precision.
+
+### Solution
+
+1. Use the `string` tag of the json standard package.
+
+```go
+package main
+
+import (
+    "context"
+
+    "github.com/cloudwego/hertz/pkg/app"
+    "github.com/cloudwego/hertz/pkg/app/server"
+    "github.com/cloudwego/hertz/pkg/protocol/consts"
+)
+
+type User struct {
+    ID int `json:"id,string"`
+}
+
+func main() {
+    h := server.Default()
+
+    h.GET("/hello", func(ctx context.Context, c *app.RequestContext) {
+        var u User
+        u.ID = 6855337641038665531
+        c.JSON(consts.StatusOK, u)
+    })
+
+    h.Spin()
+}
+```
+
+2. Using `json.Number`
+
+```go
+package main
+
+import (
+    "context"
+    "encoding/json"
+
+    "github.com/cloudwego/hertz/pkg/app"
+    "github.com/cloudwego/hertz/pkg/app/server"
+    "github.com/cloudwego/hertz/pkg/common/utils"
+    "github.com/cloudwego/hertz/pkg/protocol/consts"
+)
+
+type User struct {
+    ID json.Number `json:"id"`
+}
+
+func main() {
+    h := server.Default()
+
+    h.GET("/hello", func(ctx context.Context, c *app.RequestContext) {
+        var u User
+        err := json.Unmarshal([]byte(`{"id":6855337641038665531}`), &u)
+        if err != nil {
+            panic(err)
+        }
+        c.JSON(consts.StatusOK, u)
+    })
+
+    h.Spin()
+}
+```

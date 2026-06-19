@@ -1,5 +1,6 @@
 {{ define "main" }}
 <div class="td-content">
+	{{ partial "copy-to-llm.html" . }}
 	<h1>{{ .Title }}</h1>
   {{ with .Params.description }}<div class="lead">{{ . | markdownify }}</div>{{ end }}
 	<header class="article-meta">
@@ -18,12 +19,12 @@
 		{{ end }}
 	</header>
 	{{ .Content }}
-        {{ partial "section-index.html" . }}
-	{{ if (and (not .Params.hide_feedback) (.Site.Params.ui.feedback.enable) (.Site.GoogleAnalytics)) }}
+    {{ partial "section-index.html" . }}
+	{{ if (and (not .Params.hide_feedback) (.Site.Params.ui.feedback.enable) (.Site.Config.Services.GoogleAnalytics.ID)) }}
 		{{ partial "feedback.html" . }}
 		<br />
 	{{ end }}
-	{{ if (.Site.DisqusShortname) }}
+	{{ if (.Site.Config.Services.Disqus.Shortname) }}
 		<br />
 		{{ partial "disqus-comment.html" . }}
 	{{ end }}

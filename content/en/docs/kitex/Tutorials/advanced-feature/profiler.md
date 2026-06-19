@@ -1,11 +1,12 @@
 ---
-title: "Profiler"
+title: "Request Profiler"
 date: 2022-11-07
-weight: 4
-description: >
+weight: 9
+keywords: ["Kitex", "Profiler"]
+description: Kitex Profiler provides request-level runtime cost statistic capability.
 ---
 
-Kitex Profiler provides request-level runtime cost statistic capability.
+Note: There is additional performance overhead when enable profiler module, overhead cause by: background continuous pprof, and the processing functions written by users.
 
 ## How it works
 
@@ -23,7 +24,7 @@ We need to "color" the Goroutine and subsequent Goroutines according to Kitex re
 
 The process of a request has two stages:
 
-- Transport Stage: The stage where Kitex receives a complete binary packet. If it is the [TTHeader](https://www.cloudwego.io/docs/kitex/reference/transport_protocol_ttheader/) protocol, we can quickly parse metadata information from the header without deserialization.
+- Transport Stage: The stage where Kitex receives a complete binary packet. If it is the [TTHeader](/docs/kitex/reference/transport_protocol_ttheader/) protocol, we can quickly parse metadata information from the header without deserialization.
 - Message Stage: The stage where Kitex deserializes the binary packet into a Request struct. The deserialization part tends to account for a large part of the overall overhead if the structure of the request is complex.
 
 In our microservice governance practice, we recommend putting general information such as the source service name in the TTHeader, so that the Goroutine labels can be marked in advance without fully deserializing the request.
@@ -63,7 +64,7 @@ svr := xxxserver.NewServer(server.WithProfilerMessageTagging(msgTagging))
 
 ### Write Processor functions
 
-Kitex will periodically run callback functions with statistical results. If we have a metric system, we can upload results in the processor function. 
+Kitex will periodically run callback functions with statistical results. If we have a metric system, we can upload results in the processor function.
 
 For example, if we want to log the results:
 

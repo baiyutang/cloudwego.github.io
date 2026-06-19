@@ -8,6 +8,7 @@ description: >
 Kitex supports user-defined registration module. Users can extend and integrate other registration centers by themselves. This extension is defined under pkg/registry.
 
 ## Extension API and Definition of Info Struct
+
 - Extension API
 
 ```go
@@ -19,7 +20,8 @@ type Registry interface {
 ```
 
 - Definition of Info Struct
-Kitex defines some registration information. Users can also expand the registration information into tags as needed.
+  Kitex defines some registration information. Users can also expand the registration information into tags as needed.
+
 ```go
 // Info is used for registry.
 // The fields are just suggested, which is used depends on design.
@@ -37,10 +39,14 @@ type Info struct {
 
 	// extend other infos with Tags.
 	Tags map[string]string
+    
+    // SkipListenAddr is used to prevent the listen addr from overriding the Addr(available from Kitex v0.10.0)
+    SkipListenAddr bool
 }
 ```
 
 ## Integrate into Kitex
+
 Specify your own registration module and customized registration information through `option`. Note that registration requires service information, which is also specified through option.
 
 - Specify Server Info
@@ -73,4 +79,14 @@ Specify your own registration module and customized registration information thr
   svr := xxxservice.NewServer(handler, server.WithRegistry(yourRegistry), server.WithRegistryInfo(yourRegistryInfo))
   ```
 
+- Allow custom registry to get the actual address for registering(available from Kitex v0.10.0)
 
+  When the Client cannot access the Listen Address of the Server and needs to use a public IP address to access the Server, it can be set by specifying `Addr` and `SkipListenAddr` in RegistryInfo.
+  ```go
+  info := &registry.Info{
+       Addr: YourServerAddress,
+       SkipListenAddr: true,
+       ...
+  }
+  svr := xxxservice.NewServer(handler, server.WithRegistry(yourRegistry), server.WithRegistryInfo(info))
+  ```

@@ -30,18 +30,22 @@
 
 @import "home";
 @import "about";
-@import "community";
 @import "markdown";
 @import "safety";
+@import "copy-to-llm";
 
 @if $td-enable-google-fonts {
     @import url($web-font-path);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 footer {
     min-height: 150px;
 
-    @include media-breakpoint-down(md) {
+    @include media-breakpoint-down(lg) {
         min-height: 200px;
     }
 }

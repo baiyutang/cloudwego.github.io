@@ -1,7 +1,7 @@
 ---
 title: "Extension of Diagnosis"
 date: 2021-08-26
-weight: 12
+weight: 11
 description: >
 ---
 
@@ -57,8 +57,6 @@ const (
 )
 ```
 
-
-
 ## Integrate into Kitex
 
 Specify your own diagnostic service through option: `WithDiagnosisService`.
@@ -70,4 +68,3 @@ svr := xxxservice.NewServer(handler, server.WithDiagnosisService(yourDiagnosisSe
 // client side
 cli, err := xxxservice.NewClient(targetService, client.WithDiagnosisService(yourDiagnosisService))
 ```
-

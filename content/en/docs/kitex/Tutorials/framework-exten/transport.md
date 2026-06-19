@@ -1,7 +1,7 @@
 ---
 title: "Extension of Transport Module"
 date: 2021-08-31
-weight: 9
+weight: 8
 description: >
 ---
 
@@ -53,13 +53,13 @@ Below figure is Kitex's extension to netpoll synchronous IO, which implements `E
 
 - Server Side
 
-  option: `WithTransServerFactory`,  `WithTransHandlerFactory`
+  option: `WithTransServerFactory`, `WithTransHandlerFactory`
 
   ```go
   var opts []server.Option
   opts = append(opts, server.WithTransServerFactory(yourTransServerFactory)
   opts = append(opts, server.WithTransHandlerFactory(yourTransHandlerFactory)
-                
+
   svr := xxxservice.NewServer(handler, opts...)
   ```
 

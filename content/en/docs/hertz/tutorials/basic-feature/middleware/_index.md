@@ -1,25 +1,32 @@
 ---
 title: "Middleware Overview"
 date: 2022-05-23
-weight: 3
-description: >
-
+weight: 6
+keywords:
+  [
+    "Middleware",
+    "Server-side middleware",
+    "Client-side middleware",
+    "routing level",
+  ]
+description: "Middleware Overview."
 ---
 
 There are various types of Hertz middleware, which are simply divided into two categories.
 
-  - Server-side middleware
-  - Client-side middleware
+- Server-side middleware
+- Client-side middleware
 
 ## Server-side middleware
 
 Server-side middleware is a function in the HTTP request-response cycle that provides a convenient mechanism for inspecting and filtering HTTP requests entering your application, such as logging each request or enabling CORS.
 
-|![middleware](/img/docs/hertz_middleware.png )|
-|:--:|
-|Figure 1: middleware call chain|
+| ![middleware](/img/docs/hertz_middleware.png) |
+| :-------------------------------------------: |
+|        Figure 1: middleware call chain        |
 
 Middleware can perform tasks before or after passing the request deeper into the application:
+
 - Middleware can be executed before the request reaches business processing, such as performing identity authentication and authorization authentication. When the middleware only has pre-handle logic and there is no requirement to be in a function call stack with real handler, the `.Next` can be omitted.
 - Middleware can also be executed after business processing has been performed, such as logging response times and recovering from a panic. If there is other processing logic (post-handle) after the business handler, or there is a strong requirement for the function call chain (stack), then the `.Next` must be called explicitly, see middleware C in Figure 1.
 
@@ -45,11 +52,6 @@ func MyMiddleware() app.HandlerFunc {
    }
 }
 ```
-
-The middleware will be executed in the order defined, If you want to terminate the middleware call quickly, you can use the following methods, noting that **the current middleware will still execute**.
-- `Abort()`：terminate subsequent calls
-- `AbortWithMsg(msg string, statusCode int)`：terminates subsequent calls and sets the body and status code for the Response
-- `AbortWithStatus(code int)`：terminates subsequent calls and sets the status code
 
 ### Server-level middleware
 
@@ -151,12 +153,13 @@ Hertz provides frequently-used middlewares such as BasicAuth, CORS, JWT etc., mo
 ## Client-side Middleware
 
 Client-side middleware can be executed before the request is made or after the response is obtained:
+
 - Middleware can be executed before the request is sent, such as adding a signature or other fields to the request.
 - Middleware can also be executed after receiving the response, such as modifying the response result to adapt to the business logic.
 
 ### Implement customized middleware
 
-The middleware implementation on the Client side is different from that on the Server side. The Client side cannot get the index of the middleware to increase, so the Client middleware uses  nested functions to build the middleware in advance. When implementing client-side customized middleware, you can refer to the following code.
+The middleware implementation on the Client side is different from that on the Server side. The Client side cannot get the index of the middleware to increase, so the Client middleware uses nested functions to build the middleware in advance. When implementing client-side customized middleware, you can refer to the following code.
 
 ```go
 func MyMiddleware(next client.Endpoint) client.Endpoint {
@@ -229,3 +232,21 @@ func main() {
 ```
 
 > Middleware may be executed more than once, such as redirect, etc., idempotency needs to be considered
+
+## Note
+
+### RequestContext related operations
+
+When implementing server-side middleware, the `RequestContext` related operation is usually used, as shown in [RequestContext](/docs/hertz/tutorials/basic-feature/context/).
+
+### Handler related operations
+
+A server-side middleware is a handler, and the related operations of the handler can be found in [Handler](/docs/hertz/tutorials/basic-feature/context/request/#handler).
+
+### Quick termination of server middleware
+
+The server-side middleware will be executed in the order defined, if you want to terminate the middleware call quickly, you can use the following methods, noting that **the current middleware will still execute**.
+
+- `ctx.Abort()`：terminate subsequent calls
+- `ctx.AbortWithMsg(msg string, statusCode int)`：terminates subsequent calls and sets the body and status code for the Response
+- `ctx.AbortWithStatus(code int)`：terminates subsequent calls and sets the status code

@@ -1,8 +1,21 @@
 ---
 date: 2022-09-20
 title: "高性能 RPC 框架 CloudWeGo-Kitex 内外统一的开源实践"
+projects: ["Kitex"]
 linkTitle: "高性能 RPC 框架 CloudWeGo-Kitex 内外统一的开源实践"
-keywords: ["Kitex", "CloudWeGo", "RPC", "开源", "Kite", "Golang", "Thrift", "Protobuf", "gRPC", "xDS"]
+keywords:
+  [
+    "Kitex",
+    "CloudWeGo",
+    "RPC",
+    "开源",
+    "Kite",
+    "Go",
+    "Thrift",
+    "Protobuf",
+    "gRPC",
+    "xDS",
+  ]
 description: "本文介绍了高性能 RPC 框架 CloudWeGo-Kitex 的起源与发展历史，以及开源一年以来的功能特性变更、社区共建生态成果、企业落地实践等方面。"
 author: <a href="https://github.com/YangruiEmma" target="_blank">YangruiEmma</a>
 ---
@@ -13,14 +26,14 @@ author: <a href="https://github.com/YangruiEmma" target="_blank">YangruiEmma</a>
 
 ### CloudWeGo 和 Kitex
 
-[Kitex][Kitex] 是 CloudWeGo 开源的第一个微服务框架，它是一个 **支持多协议的 Golang RPC 框架** ，从网络库、序列化库到框架的实现**基本完全自研**的。
+[Kitex][Kitex] 是 CloudWeGo 开源的第一个微服务框架，它是一个 **支持多协议的 Go RPC 框架** ，从网络库、序列化库到框架的实现**基本完全自研**的。
 特别地，[Kitex][Kitex] 对 gRPC 协议的支持使用了 gRPC 官方的源码，但是我们对 gRPC 的实现做了 **深度且定制的优化** ，所以 [Kitex][Kitex] 支持的 gRPC 协议性能优于 gRPC 官方框架。
-同时这也是 [Kitex][Kitex] 与目前已经开源的、支持 gRPC 协议的其他 Golang 框架的主要差异。如果用户想使用 gRPC 又对性能有很高的要求，那么 [Kitex][Kitex] 框架将会是一个很不错的选择。
+同时这也是 [Kitex][Kitex] 与目前已经开源的、支持 gRPC 协议的其他 Go 框架的主要差异。如果用户想使用 gRPC 又对性能有很高的要求，那么 [Kitex][Kitex] 框架将会是一个很不错的选择。
 
-继 [Kitex][Kitex] 开源后，今年 CloudWeGo 又陆续开源了 Golang HTTP 框架 [Hertz](https://github.com/cloudwego/hertz)，Rust RPC 框架 [Volo](https://github.com/cloudwego/volo)，同时围绕这些微服务框架和微服务的一些通用能力，
-我们还开源了一些高性能的基础库。关于更多 CloudWeGo 开源的子项目，可以进入 CloudWeGo [官网](https://www.cloudwego.io/zh/)详细了解。
+继 [Kitex][Kitex] 开源后，今年 CloudWeGo 又陆续开源了 Go HTTP 框架 [Hertz](https://github.com/cloudwego/hertz)，Rust RPC 框架 [Volo](https://github.com/cloudwego/volo)，同时围绕这些微服务框架和微服务的一些通用能力，
+我们还开源了一些高性能的基础库。关于更多 CloudWeGo 开源的子项目，可以进入 CloudWeGo [官网](/zh/)详细了解。
 
-CloudWeGo 官网：https://www.cloudwego.io/
+[CloudWeGo 官网](/)
 
 ![image](/img/blog/1st_RPC_Kitex/1.png)
 
@@ -31,13 +44,13 @@ CloudWeGo 官网：https://www.cloudwego.io/
 
 ### Kitex 发展历史
 
-2014 年，字节跳动开始引入 Golang。2015 年，字节跳动内部的服务化开启。在 RPC 调用的场景选择了 Thrift 协议，在内部开始支持 RPC 框架。2016 年，第一个 Golang RPC 框架 Kite 正式发布。
+2014 年，字节跳动开始引入 Go。2015 年，字节跳动内部的服务化开启。在 RPC 调用的场景选择了 Thrift 协议，在内部开始支持 RPC 框架。2016 年，第一个 Go RPC 框架 Kite 正式发布。
 通常在一个公司高速发展的初期，基础能力都是为了快速支持需求落地，面对的需求场景也较单一，设计上不会有较多考量，其实这也是合理的，因为探索阶段并不完全清楚还需要支持哪些场景，过多的考虑反而会出现过度设计的问题。
 
 但是，随着业务场景复杂化，需求也会多样化，而且接入服务及调用量逐年增长，Kite 已经不足以支持后续的迭代，在线上服役三年多后，2019 年我们开启了新的项目 [Kitex][Kitex]，2020 年初发布了正式版本，在 2020 年底字节内部已经有 1w+ 服务接入 Kitex。
 
-从 2014 年到 2020 年，Golang 已经是字节跳动内部主要的业务开发语言，应该是业界 Golang 应用最多的公司。我们的服务框架支持着数万个 Golang 微服务的可靠通信，
-经过数量众多的微服务和海量流量的验证，我们已经有了较为成熟的微服务最佳实践，于是考虑将内部的实践开源出去丰富云原生社区的 Golang 产品体系。
+从 2014 年到 2020 年，Go 已经是字节跳动内部主要的业务开发语言，应该是业界 Go 应用最多的公司。我们的服务框架支持着数万个 Go 微服务的可靠通信，
+经过数量众多的微服务和海量流量的验证，我们已经有了较为成熟的微服务最佳实践，于是考虑将内部的实践开源出去丰富云原生社区的 Go 产品体系。
 在 2021年，我们以 CloudWeGo 品牌正式开源了第一个服务框架 [Kitex][Kitex]。截至今年 8 月，[Kitex][Kitex] 已经为字节跳动内部 **6w+** 的服务提供支持， **峰值 QPS 达到上亿级别** 。
 
 ![image](/img/blog/1st_RPC_Kitex/3.png)
@@ -45,7 +58,7 @@ CloudWeGo 官网：https://www.cloudwego.io/
 大家或许还有疑问，完整的微服务体系离不开基础的云生态，无论在公有云、私有云，都需要搭建额外的服务以很好地支持微服务的治理，比如治理平台、注册中心、配置中心、监控、链路跟踪、服务网格等，而且还存在一些定制的规范。
 字节跳动自然也有完善的内部服务支持微服务体系，但这些服务短期还无法开源，那 CloudWeGo 如何内外维护一套代码，统一迭代呢？
 
-关于这个问题，我们看一下 [Kitex][Kitex] 的模块划分。[Kitex][Kitex] 的模块分为三个部分：中间是 [Kitex][Kitex] 主干部分  **Kitex Core** ，它定义了框架的层次结构、接口核心逻辑的实现以及接口的默认实现；
+关于这个问题，我们看一下 [Kitex][Kitex] 的模块划分。[Kitex][Kitex] 的模块分为三个部分：中间是 [Kitex][Kitex] 主干部分 **Kitex Core** ，它定义了框架的层次结构、接口核心逻辑的实现以及接口的默认实现；
 左边的 **Kitex Tool** 则是与生成代码相关的实现，我们的生成代码工具就是编译这个包得到的，其中包括 IDL 的解析、校验、代码生成、插件支持等。
 不过为了便于用户使用同时提供更友好的扩展，主要能力也做了拆分作为基础库独立开源，如 Thriftgo、Thrift-validator 插件、Fastpb；
 右边的 **Kitex Byted** 是对字节内部基础能力集成的扩展实现，我们在开始就将内部的能力作为扩展收敛到一个 package 下。
@@ -55,7 +68,7 @@ CloudWeGo 官网：https://www.cloudwego.io/
 如此，我们就可以将 [Kitex][Kitex] Core 和 Tool 部分开源出去。我们将代码做了拆分，[Kitex][Kitex] 的核心代码和工具部分迁移到开源库，集成内部扩展的模块作为 [Kitex][Kitex] 的扩展保留在内部库，同时内部库封装一层壳保证内部用户可以无感知地升级。
 
 那么 [Kitex][Kitex] 的开源就只是代码拆分这么简单吗？显然不是。2021 年 2 月，我们开始筹备 [Kitex][Kitex] 的开源，虽然基于 [Kitex][Kitex] 的扩展性，我们可以与内部基础设施集成的能力解耦，但是 [Kitex][Kitex] 仍然依赖内部的一些基础库，如果要开源必须先开源基础库的能力。
-所以我们首先做了依赖库的梳理，与相关的同学合作首先开源了 **bytedance/gopkg** 库。这个库由 CloudWeGo 与字节跳动的语言团队合作维护，里面包含也了对 Golang 标准库能力的增强，感兴趣的同学可以关注使用。
+所以我们首先做了依赖库的梳理，与相关的同学合作首先开源了 **bytedance/gopkg** 库。这个库由 CloudWeGo 与字节跳动的语言团队合作维护，里面包含也了对 Go 标准库能力的增强，感兴趣的同学可以关注使用。
 
 bytedance/gopkg: https://github.com/bytedance/gopkg
 
@@ -80,20 +93,20 @@ bytedance/gopkg: https://github.com/bytedance/gopkg
 
 在介绍 [Kitex][Kitex] 开源一年变更前，先分享一下框架的衡量指标，这是大家在选择一个框架时要考虑的。
 
-* **扩展性**
+- **扩展性**
 
 如果一个框架与内部能力强耦合，就无法移植到其他平台，或框架的支持场景单一也无法进行扩展，这样的框架很难得到外部的使用。
 
-* **易用性**
+- **易用性**
 
 框架的易用性体现在两个方面。第一是面向**业务开发者** ，如果一个框架在使用过程中需要让用户关注很多框架的细节，那么对研发效率要求很高的团队可能无法接受。
 第二是面向**框架的二次开发者** ，他们需要对框架做一些定制支持，如果框架提供的扩展能力过于宽泛，扩展成本很高，或者可扩展的能力不够多，那么这个框架也是存在局限性的。
 
-* **功能的丰富度**
+- **功能的丰富度**
 
 虽然基于扩展性可以对框架进行定制，但不是所有开发者都有足够的精力做定制开发，如果框架本身对各种扩展能力提供了不同选择的支持，对于开发者来说只需要根据自己的基础设施进行组合就能在自己的环境中运行。
 
-* **高性能**
+- **高性能**
 
 前面三点是初期选择框架需要重点关注的指标，但随着服务规模和资源消耗变大，性能就成了不容忽视的问题。从长期的角度来说，选择框架的时候一定要关注性能，否则后续只能面临框架替换的问题，或者被迫对这个框架做定制维护。
 
@@ -125,7 +138,7 @@ Protobuf 的泛化也是应用在 API 网关的场景。原来的 HTTP 泛化传
 **目前 [Kitex][Kitex] 的泛化主要针对后端的 Thrift 服务，无论是 Protobuf、Map 还是 JSON，[Kitex][Kitex] 都会在调用端结合 IDL 解析，将这些数据映射编码为 Thrift 包发给后端服务。**
 
 那么为什么把泛化放在调用端而不是服务端呢？大家广泛了解的泛化都是服务端对泛化请求做了解析处理，当然调用端也要相应地提供泛化的 Client。
-但是泛化面向的是通用服务，泛化使用成本其实是比较高的，它并不适用于普通的 RPC 场景，而通用服务面向的是所有后端的服务，有 Golang/Java/C++/Python/Rust，如果每一种语言框架都支持泛化，成本是非常高的。
+但是泛化面向的是通用服务，泛化使用成本其实是比较高的，它并不适用于普通的 RPC 场景，而通用服务面向的是所有后端的服务，有 Go/Java/C++/Python/Rust，如果每一种语言框架都支持泛化，成本是非常高的。
 就算各个语言都对泛化做了支持，框架版本收敛又是一个漫长的过程，对于通用服务来说，对接所有的服务就显得不太现实。综合以上原因，泛化放在调用端支持。
 
 #### 重试能力增强
@@ -159,7 +172,7 @@ Thrift-gen-validator 是 Thriftgo 的一个工具插件，它可以根据 Thrift
 #### Thrift 高性能编解码
 
 **[Frugal][Frugal] 是一个无需生成编解码代码、基于 JIT 的高性能动态 Thrift 编解码器。** 虽然我们针对官方 Thrift 编解码已经做了优化，支持了 FastThrift，这个在我们开源前发布的优化实践里也有介绍，
-但我们希望能有进一步的性能提升，参考我们开源的高性能 JSON 库 Sonic 的设计，实现了 Thrift JIT 编解码器。下图中的表格是 [Frugal][Frugal] 结合 [Kitex][Kitex]  与 FastThrift 的性能对比。
+但我们希望能有进一步的性能提升，参考我们开源的高性能 JSON 库 Sonic 的设计，实现了 Thrift JIT 编解码器。下图中的表格是 [Frugal][Frugal] 结合 [Kitex][Kitex] 与 FastThrift 的性能对比。
 
 ![image](/img/blog/1st_RPC_Kitex/11.png)
 
@@ -173,9 +186,10 @@ Thrift-gen-validator 是 Thriftgo 的一个工具插件，它可以根据 Thrift
 虽然我们内部主要支持 Thrift，但开源之后我们发现外部用户对于 Protobuf 或 gRPC 的关注会更多，所以参考 [Kitex][Kitex] FastThrift 的优化思路，重新实现了 Protobuf 的生成代码。
 在 v0.4.0 版本，如果用户使用 [Kitex][Kitex] 的工具生成 Protobuf 的代码，就会默认生成 [Fastpb][Fastpb] 的编解码代码，在发起 RPC 调用的时候，[Kitex][Kitex] 也会默认使用 [Fastpb][Fastpb]。
 
-下图是 [Fastpb][Fastpb] 与官方 Protobuf 序列化的性能对比，可以看到无论是编码还是解码，在效率和内存分配上，[Fastpb][Fastpb] 都远远优于官方 Protobuf 序列化库。
+下面列出的是 [Fastpb][Fastpb] 与官方 Protobuf 序列化的性能对比，可以看到无论是编码还是解码，在效率和内存分配上，[Fastpb][Fastpb] 都远远优于官方 Protobuf 序列化库。
 
-![image](/img/blog/1st_RPC_Kitex/12.png)
+- FastWrite: **(ns/op) ↓67.8% ，(B/op) ↓83.9%**
+- FastRead: **(ns/op) ↓41.5% ，(B/op) ↓4.5%**
 
 #### gRPC 性能优化
 
@@ -241,16 +255,16 @@ Kitex v0.4.0: https://mp.weixin.qq.com/s/ezifbQkHcZQP6MygmJABYA
 
 本次分享主要介绍了以下内容：
 
-* [Kitex][Kitex] 如何保持内外统一地从内部应用较广的框架转为开源框架；
-* 开源一年以来发布了哪些重要的功能特性，做了哪些性能优化；
-* 借助社区的力量现在 [Kitex][Kitex] 的周边生态如何、企业落地情况以及如何使用 [Kitex][Kitex] 优雅地集成内部能力。
+- [Kitex][Kitex] 如何保持内外统一地从内部应用较广的框架转为开源框架；
+- 开源一年以来发布了哪些重要的功能特性，做了哪些性能优化；
+- 借助社区的力量现在 [Kitex][Kitex] 的周边生态如何、企业落地情况以及如何使用 [Kitex][Kitex] 优雅地集成内部能力。
 
 ### 展望
 
-* 与社区同学共建，持续丰富社区生态；
-* 结合工程实践，为微服务开发者提供更多便利；
-* 完善好 BDThrift 生态，持续优化 Protobuf/gRPC；
-* 更多特性支持或开源，ShmIPC、QUIC、Protobuf 泛化…
+- 与社区同学共建，持续丰富社区生态；
+- 结合工程实践，为微服务开发者提供更多便利；
+- 完善好 BDThrift 生态，持续优化 Protobuf/gRPC；
+- 更多特性支持或开源，ShmIPC、QUIC、Protobuf 泛化…
 
 [Kitex]: https://github.com/cloudwego/kitex
 [Frugal]: https://github.com/cloudwego/frugal

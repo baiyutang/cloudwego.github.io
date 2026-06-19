@@ -1,9 +1,9 @@
 ---
 title: "中间件概览"
 date: 2022-05-20
-weight: 3
-description: >
-
+weight: 6
+keywords: ["中间件", "服务端中间件", "客户端中间件", "路由级别"]
+description: "中间件概览。"
 ---
 
 Hertz中间件的种类是多种多样的，简单分为两大类：
@@ -15,11 +15,12 @@ Hertz中间件的种类是多种多样的，简单分为两大类：
 
 Hertz 服务端中间件是 HTTP 请求－响应周期中的一个函数，提供了一种方便的机制来检查和过滤进入应用程序的 HTTP 请求， 例如记录每个请求或者启用CORS。
 
-|![middleware](/img/docs/hertz_middleware.png )|
-|:--:|
-|图1：中间件调用链|
+| ![middleware](/img/docs/hertz_middleware.png) |
+| :-------------------------------------------: |
+|               图1：中间件调用链               |
 
 中间件可以在请求更深入地传递到业务逻辑之前或之后执行：
+
 - 中间件可以在请求到达业务逻辑之前执行，比如执行身份认证和权限认证，当中间件只有初始化（pre-handle）相关逻辑，且没有和 real handler 在一个函数调用栈中的需求时，中间件中可以省略掉最后的`.Next`，如图1的中间件 B。
 - 中间件也可以在执行过业务逻辑之后执行，比如记录响应时间和从异常中恢复。如果在业务 handler 处理之后有其它处理逻辑（ post-handle ），或对函数调用链（栈）有强需求，则必须显式调用`.Next`，如图1的中间件 C。
 
@@ -44,11 +45,6 @@ func MyMiddleware() app.HandlerFunc {
   }
 }
 ```
-
-中间件会按定义的先后顺序依次执行，如果想快速终止中间件调用，可以使用以下方法，注意**当前中间件仍将执行**。
-- `Abort()`：终止后续调用
-- `AbortWithMsg(msg string, statusCode int)`：终止后续调用，并设置 response中body，和状态码
-- `AbortWithStatus(code int)`：终止后续调用，并设置状态码
 
 ### Server 级别中间件
 
@@ -150,6 +146,7 @@ Hertz 提供了常用的 BasicAuth、CORS、JWT等中间件，更多实现可以
 ## 客户端中间件
 
 客户端中间件可以在请求发出之前或获取响应之后执行：
+
 - 中间件可以在请求发出之前执行，比如统一为请求添加签名或其他字段。
 - 中间件也可以在收到响应之后执行，比如统一修改响应结果适配业务逻辑。
 
@@ -228,3 +225,21 @@ func main() {
 ```
 
 > 中间件可能执行不止一次，比如发生跳转等，需要考虑幂等性
+
+## 注意
+
+### RequestContext 相关操作
+
+在实现服务端中间件的时候通常会用到 `RequestContext` 相关操作，见 [请求上下文](/zh/docs/hertz/tutorials/basic-feature/context/)。
+
+### Handler 相关操作
+
+一个服务端中间件即为一个 Handler，Handler 相关操作见 [Handler](/zh/docs/hertz/tutorials/basic-feature/context/request/#handler)。
+
+### 快速中止服务端中间件
+
+服务端中间件会按定义的先后顺序依次执行，如果想快速终止中间件调用，可以使用以下方法，注意**当前中间件仍将执行**。
+
+- `ctx.Abort()`：终止后续调用
+- `ctx.AbortWithMsg(msg string, statusCode int)`：终止后续调用，并设置 response 中 body 和状态码
+- `ctx.AbortWithStatus(code int)`：终止后续调用，并设置状态码

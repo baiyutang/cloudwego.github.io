@@ -1,6 +1,7 @@
 ---
 date: 2022-06-21
 title: "超大规模的企业级微服务 HTTP 框架 — Hertz 正式开源！"
+projects: ["Hertz"]
 linkTitle: "超大规模的企业级微服务 HTTP 框架 — Hertz 正式开源！"
 keywords: ["hertz", "微服务", "http", "go", "golang", "开源"]
 description: "本文介绍了字节跳动正式开源超大规模的企业级微服务 HTTP 框架 — Hertz。"
@@ -17,7 +18,7 @@ author: <a href="https://github.com/CloudWeGo" target="_blank">CloudWeGo</a>
 ## 01 Hertz 概述
 
 [Hertz][Hertz] 是一个超大规模的企业级微服务 HTTP 框架，具有高易用性、易扩展、低时延等特点。最初，字节跳动内部的 HTTP 框架是对 Gin 框架的封装，具备不错的易用性、生态完善等优点。
-随着内部业务的不断发展，对高性能、多场景的需求日渐强烈。而 Gin 是对 Golang 原生 net/http 进行的二次开发，在按需扩展和性能优化上受到很大局限。
+随着内部业务的不断发展，对高性能、多场景的需求日渐强烈。而 Gin 是对 Go 原生 net/http 进行的二次开发，在按需扩展和性能优化上受到很大局限。
 因此，为了满足业务需求，更好的服务各大业务线，2020 年初，字节跳动服务框架团队经过内部对使用场景和外部主流开源 HTTP 框架 Fasthttp、Gin、Echo 的调研后，
 开始基于自研网络库 [Netpoll][Netpoll] 开发内部框架 [Hertz][Hertz]，让 [Hertz][Hertz] 在面对企业级需求时，有更好的性能及稳定性表现，也能够满足业务发展和应对不断演进的技术需求。
 2021 年 7 月，[Hertz][Hertz] 正式上线 1.0 版本。
@@ -28,23 +29,23 @@ author: <a href="https://github.com/CloudWeGo" target="_blank">CloudWeGo</a>
 
 下面是 [Hertz][Hertz] 的一些特性：
 
-* **稳定性**
+- **稳定性**
 
   [Hertz][Hertz] 在如此大规模的场景下，每一个 PR 的合入、每一次发版都要慎之又慎，稍有不慎便可能造成千万甚至更多的损失。我们制定了规范的 PR、发版流程，每次合入代码需要由有经验的同学审核。
   即便如此，为了降低风险，我们也搭建了各种测试场景，包括兼容性、高并发、大小包等场景，每次的 PR、发版都需要测试一段时间，充分测试，将每次发版的风险减少到最低。
 
-* **高易用性**
+- **高易用性**
 
   在开发过程中，快速写出正确的代码往往是重要的。[Hertz][Hertz] 在设计 API 时，考虑到用户的使用习惯，参考业界主流框架使用 API 的方式，并加以优化。在 [Hertz][Hertz] 在迭代过程中，积极听取用户意见，持续打磨框架，
   比如很多用户希望 Client 也有 Trace 的能力，为此，[Hertz][Hertz] Client 支持了中间件能力；在代理场景中，[Hertz][Hertz] Client 也支持了流式处理。
   在做中间件和流式处理设计时，也考虑到用户实际使用习惯，帮助用户更快地写出正确的代码。[Hertz][Hertz] 也提供了命令行工具，一键生成代码，提高框架的易用性。
 
-* **易扩展**
+- **易扩展**
 
   [Hertz][Hertz] 采用了分层设计，提供了较多的接口以及默认的扩展实现，用户也可以自行扩展，详情可参考 CloudWeGo 官网的 [Hertz][Hertz] 扩展部分。
   同时得益于框架的分层设计，框架的扩展性也会大很多。目前仅将稳定的能力开源给社区，更多的规划参考 RoadMap。
 
-* **低延时**
+- **低延时**
 
   [Hertz][Hertz] 默认使用自研的高性能网络库 [Netpoll][Netpoll]，在一些特殊场景中，相较于 go net，[Hertz][Hertz] 在 QPS、时延上均具有一定优势。关于性能数据，可参考下图 Echo 数据。
   在内部实践中，某些典型服务，如框架占比较高的服务、网关等服务，迁移 [Hertz][Hertz] 后相比 Gin 框架，资源使用显著减少，**CPU 使用率随流量大小降低 30%—60%。**
@@ -52,7 +53,7 @@ author: <a href="https://github.com/CloudWeGo" target="_blank">CloudWeGo</a>
 
   ![image](/img/blog/Hertz_Open_Source/Echo.png)
 
-  * **命令行工具**
+  - **命令行工具**
 
   [Hertz][Hertz] 提供了一个简单易用的命令行工具 Hz，用户只需提供一个 IDL，根据定义好的接口信息，Hz 便可以一键生成项目脚手架，开箱即用使用 [Hertz][Hertz]；Hz 也提供更新能力，用户的 IDL 如果发生改变，Hz 可以更新脚手架。
   目前 Hz 支持了 Thrift 和 Protobuf 两种 IDL 定义。命令行工具内置丰富的选项，可以根据自己的需求使用。
@@ -73,16 +74,16 @@ author: <a href="https://github.com/CloudWeGo" target="_blank">CloudWeGo</a>
 
 ## 03 RoadMap
 
-对于基础架构团队而言，[Hertz][Hertz] 不仅仅是一个开源项目，它也是一个**真实的超大规模企业级实践项目**。通过开源，我们希望 [Hertz][Hertz] 能丰富云原生社区的 Golang 中间件体系，
+对于基础架构团队而言，[Hertz][Hertz] 不仅仅是一个开源项目，它也是一个**真实的超大规模企业级实践项目**。通过开源，我们希望 [Hertz][Hertz] 能丰富云原生社区的 Go 中间件体系，
 完善 CloudWeGo 生态矩阵，为更多开发者和企业搭建云原生化的大规模分布式系统，提供一种现代的、资源高效的的技术方案。
 
 如前文所述，目前 [Hertz][Hertz] 只开源了内部经过稳定性验证的部分，未来，我们会进一步推动其走向完善：
 
-* **云原生能力支持**。支持 xDS API，从 Istio 动态获取服务配置。
-* **多协议的支持**。[Hertz][Hertz] 目前只开源了 HTTP1 的部分，未来我们还会开源其他协议，如：HTTP2、Websocket、ALPN 等，为开发者提供更多场景的微服务需求支持。如果有需求也可以提交 issue 告诉我们，让我们知道您的需求以便快速支持。
-* **更好用的命令行工具**。我们将继续迭代 Hz，持续集成各种常用的中间件，提供模块化构建能力，用户可以按需选择所需组件。
-* **更完善的生态支持**。由于 [Hertz][Hertz] 没有采用 go net 的数据结构，需要更多的生态支持。第一批开源我们只开源了 CORS、Trace、Metrics 等生态。未来我们还将支持包括反向代理、Session 等生态。
-* **结合内外部用户需求，持续迭代**。项目开源后，我们也会根据开发者需求开展迭代。
+- **云原生能力支持**。支持 xDS API，从 Istio 动态获取服务配置。
+- **多协议的支持**。[Hertz][Hertz] 目前只开源了 HTTP1 的部分，未来我们还会开源其他协议，如：HTTP2、Websocket、ALPN 等，为开发者提供更多场景的微服务需求支持。如果有需求也可以提交 issue 告诉我们，让我们知道您的需求以便快速支持。
+- **更好用的命令行工具**。我们将继续迭代 Hz，持续集成各种常用的中间件，提供模块化构建能力，用户可以按需选择所需组件。
+- **更完善的生态支持**。由于 [Hertz][Hertz] 没有采用 go net 的数据结构，需要更多的生态支持。第一批开源我们只开源了 CORS、Trace、Metrics 等生态。未来我们还将支持包括反向代理、Session 等生态。
+- **结合内外部用户需求，持续迭代**。项目开源后，我们也会根据开发者需求开展迭代。
 
 欢迎大家向 [Hertz][Hertz] 提交 issue 和 PR 一起来共建。
 
@@ -90,9 +91,9 @@ author: <a href="https://github.com/CloudWeGo" target="_blank">CloudWeGo</a>
 
 ## 04 相关链接
 
-* 项目地址: https://github.com/cloudwego/hertz
+- 项目地址: https://github.com/cloudwego/hertz
 
-* 周边生态: https://github.com/hertz-contrib
+- 周边生态: https://github.com/hertz-contrib
 
 [Hertz]: https://github.com/cloudwego/hertz
 [Kitex]: https://github.com/cloudwego/kitex

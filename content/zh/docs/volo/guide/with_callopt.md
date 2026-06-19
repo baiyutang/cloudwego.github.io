@@ -3,7 +3,6 @@ title: "在调用时指定 CallOpt"
 linkTitle: "在调用时指定 CallOpt"
 weight: 1
 description: >
-
 ---
 
 为了增加框架的灵活性和易用性，Volo 允许用户在 Client 端使用 `CallOpt` 针对单个请求设置一些请求的元信息。
@@ -35,7 +34,7 @@ lazy_static! {
     static ref CLIENT: volo_gen::volo::example::ItemServiceClient = {
         let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
         volo_gen::volo::example::ItemServiceClientBuilder::new("volo-example-item")
-            .layer_inner(LogLayer)
+            .layer_outer(LogLayer)
             .address(addr)
             .build()
     };

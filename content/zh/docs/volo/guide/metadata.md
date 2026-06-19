@@ -3,7 +3,6 @@ title: "元信息传递"
 linkTitle: "元信息传递"
 weight: 4
 description: >
-
 ---
 
 ## 前言
@@ -16,7 +15,7 @@ description: >
 2. 这样的话，使用 Thrift / Protobuf IDL 定义并约束 RPC API 就没有意义了；
 3. TTHeader 对于头部信息总大小有限制（64K），如果略大就可能导致传输直接失败，而如果大量采用这个方法进行传递，早晚有一天会达到上限，并导致所有 RPC 请求均失败；
 4. 这种方式性能差，无论是实现上的性能还是传递时每一跳都会额外消耗的资源；
-5. 可以想象一下如果所有业务都通过这种方式来透传字段，未来的可维护性几乎为零，且无法收敛。
+5. 可以想象一下如果所有业务都通过这种方式来透传字段，未来的可维护性几乎为零，且无法收敛。
 
 ## 方案介绍
 
@@ -39,7 +38,6 @@ use metainfo::{Backward, Forward};
 
 pub struct S;
 
-#[volo::async_trait]
 impl volo_gen::volo::example::ItemService for S {
     async fn get_item(
         &self,
@@ -53,7 +51,12 @@ impl volo_gen::volo::example::ItemService for S {
                 mi.get_all_persistents(),
                 mi.get_all_upstreams()
             );
-            mi.set_backward_transient("test_backward", "test_backward_value");
+            // 获取某个值，需要注意的是，自metainfo:0.7.11后元信息统一风格(RPC采用全大写+下划线"_"作分隔符)，
+            // 上游的元信息会自动将小写转换为大写，"-"转换为"_"，如"TEST_transient-key"会被转换为"TEST_TRANSIENT_KEY"
+            println!("TEST_PERSISTENT_KEY: {:?}", mi.get_persistent("TEST_PERSISTENT_KEY"));
+            println!("TEST_TRANSIENT_KEY: {:?}", mi.get_upstream("TEST_TRANSIENT_KEY"));
+
+            mi.set_backward_transient("TEST_BACKWARD", "test_backward_value");
         });
         Ok(Default::default())
     }
@@ -73,7 +76,7 @@ lazy_static! {
     static ref CLIENT: volo_gen::volo::example::ItemServiceClient = {
         let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
         volo_gen::volo::example::ItemServiceClientBuilder::new("volo-example-item")
-            .layer_inner(LogLayer)
+            .layer_outer(LogLayer)
             .address(addr)
             .build()
     };
@@ -82,13 +85,13 @@ lazy_static! {
 #[volo::main]
 async fn main() {
     let mut mi = MetaInfo::new();
-    mi.set_persistent("test_persistent_key", "test_persistent");
-    mi.set_transient("test_transient_key", "test_transient");
+    mi.set_persistent("TEST_PERSISTENT_KEY", "test_persistent");
+    mi.set_transient("TEST_TRANSIENT_KEY", "test_transient");
 
     METAINFO
         .scope(RefCell::new(mi), async move {
             let req = volo_gen::volo::example::GetItemRequest { id: 1024 };
-            let resp = CLIENT.clone().get_item(req).await;
+            let resp = CLIENT.get_item(req).await;
             match resp {
                 Ok(info) => tracing::info!("{:?}", info),
                 Err(e) => tracing::error!("{:?}", e),

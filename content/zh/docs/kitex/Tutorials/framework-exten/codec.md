@@ -1,7 +1,7 @@
 ---
 title: "编解码 (协议) 扩展"
 date: 2021-08-26
-weight: 8
+weight: 7
 description: >
 ---
 
@@ -122,7 +122,7 @@ cli, err := xxxservice.NewClient(targetService, client.WithCodec(yourCodec))
 
 ```go
 // server side
-svr := xxxservice.NewServer(handler, server.WitWithPayloadCodechCodec(yourPayloadCodec))
+svr := xxxservice.NewServer(handler, server.WithPayloadCodec(yourPayloadCodec))
 
 // client side
 cli, err := xxxservice.NewClient(targetService, client.WithPayloadCodec(yourPayloadCodec))

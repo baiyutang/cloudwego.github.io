@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="{{ .Site.Language.Lang }}" class="no-js">
+<html lang="{{ .Site.Language.Lang }}" class="no-js"
+    {{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
+    {{- if $darkMode.enable }} data-theme-init{{ end }}>
   <head>
     {{ partial "head.html" . }}
   </head>
@@ -8,6 +10,7 @@
       {{ partial "navbar.html" . }}
     </header>
     <div class="container-fluid td-default td-outer">
+      {{- partial "banner.md" . | markdownify }}
       <main role="main" class="td-main">
         {{ block "main" . }}{{ end }}
       </main>

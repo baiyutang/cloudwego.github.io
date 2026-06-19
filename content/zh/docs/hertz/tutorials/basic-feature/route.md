@@ -2,29 +2,38 @@
 title: "路由"
 date: 2022-09-06
 weight: 2
-description: >
-
+keywords:
+  [
+    "路由",
+    "路由组",
+    "静态路由",
+    "参数路由",
+    "路由优先级",
+    "NoRoute",
+    "NoMethod",
+  ]
+description: "Hertz 提供的路由功能。"
 ---
 
 ## 路由注册
 
 Hertz 提供了 `GET`、`POST`、`PUT`、`DELETE`、`ANY` 等方法用于注册路由。
 
-
-| 方法  | 介绍  |
-| ------------ | ------------ |
-|  `Hertz.GET`   |  用于注册 HTTP Method 为 GET 的方法    |
-|  `Hertz.POST` |  用于注册 HTTP Method 为 POST 的方法  |
-|  `Hertz.DELETE` |  用于注册 HTTP Method 为 DELETE 的方法  |
-|  `Hertz.PUT` |  用于注册 HTTP Method 为 PUT 的方法  |
-|  `Hertz.PATCH` |  用于注册 HTTP Method 为 PATCH 的方法  |
-|  `Hertz.HEAD` |  用于注册 HTTP Method 为 HEAD 的方法  |
-|  `Hertz.OPTIONS` |  用于注册 HTTP Method 为 OPTIONS 的方法  |
-|  `Hertz.Handle` |  这个方法支持用户手动传入 HTTP Method 用来注册方法，当用于注册普通的 HTTP Method 方法时和上述的方法作用是一致的，并且这个方法同时也支持用于注册自定义 HTTP Method 方法 |
-|  `Hertz.Any` |  用于注册所有 HTTP Method 方法    |
-|  `Hertz.StaticFile/Static/StaticFS` |  用于注册静态文件  |
+| 方法                               | 介绍                                                                                                                                                                  |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Hertz.GET`                        | 用于注册 HTTP Method 为 GET 的方法                                                                                                                                    |
+| `Hertz.POST`                       | 用于注册 HTTP Method 为 POST 的方法                                                                                                                                   |
+| `Hertz.DELETE`                     | 用于注册 HTTP Method 为 DELETE 的方法                                                                                                                                 |
+| `Hertz.PUT`                        | 用于注册 HTTP Method 为 PUT 的方法                                                                                                                                    |
+| `Hertz.PATCH`                      | 用于注册 HTTP Method 为 PATCH 的方法                                                                                                                                  |
+| `Hertz.HEAD`                       | 用于注册 HTTP Method 为 HEAD 的方法                                                                                                                                   |
+| `Hertz.OPTIONS`                    | 用于注册 HTTP Method 为 OPTIONS 的方法                                                                                                                                |
+| `Hertz.Handle`                     | 这个方法支持用户手动传入 HTTP Method 用来注册方法，当用于注册普通的 HTTP Method 方法时和上述的方法作用是一致的，并且这个方法同时也支持用于注册自定义 HTTP Method 方法 |
+| `Hertz.Any`                        | 用于注册所有 HTTP Method 方法                                                                                                                                         |
+| `Hertz.StaticFile/Static/StaticFS` | 用于注册静态文件                                                                                                                                                      |
 
 示例代码:
+
 ```go
 package main
 
@@ -64,7 +73,7 @@ func main(){
 	h.Any("/ping_any", func(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusOK, "any")
 	})
-	h.Handle("Load","/load", func(ctx context.Context, c *app.RequestContext) {
+	h.Handle("LOAD","/load", func(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusOK, "load")
 	})
 	h.Spin()
@@ -74,10 +83,10 @@ func main(){
 
 ## 路由组
 
-Hertz 提供了路由组( `Group` )的能力，用于支持路由分组的功能，同时中间件也可以注册到路由组上。
-
+Hertz 提供了路由组 ( `Group` ) 的能力，用于支持路由分组的功能，同时中间件也可以注册到路由组上。
 
 示例代码:
+
 ```go
 package main
 
@@ -115,6 +124,7 @@ func main(){
 如下示例在路由组中使用 `BasicAuth` 中间件。
 
 示例代码 1:
+
 ```go
 package main
 
@@ -131,14 +141,15 @@ func main() {
 	// use middleware
 	v1 := h.Group("/v1", basic_auth.BasicAuth(map[string]string{"test": "test"}))
 
-	v1.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK,"ping")
+	v1.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK,"ping")
 	})
 	h.Spin()
 }
 ```
 
 示例代码 2:
+
 ```go
 package main
 
@@ -155,8 +166,8 @@ func main() {
 	v1 := h.Group("/v1")
 	// use `Use` method
 	v1.Use(basic_auth.BasicAuth(map[string]string{"test": "test"}))
-	v1.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK,"ping")
+	v1.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK,"ping")
 	})
 	h.Spin()
 }
@@ -164,29 +175,31 @@ func main() {
 
 ## 路由类型
 
-Hertz 支持丰富的路由类型用于实现复杂的功能，包括静态路由、参数路由、通配路由。
+Hertz 支持丰富的路由类型用于实现复杂的功能，包括静态路由、参数路由 (命名参数、通配参数)。
 
-路由的优先级:`静态路由` > `命名路由` > `通配路由`
+路由的优先级:`静态路由` > `命名参数路由` > `通配参数路由`
 
 ### 静态路由
 
 具体示例可参见上文
 
-### 参数路由
+### 命名参数路由
+
 Hertz 支持使用 `:name` 这样的命名参数设置路由，并且命名参数只匹配单个路径段。
 
-如果我们设置`/user/:name`路由，匹配情况如下
+如果我们设置 `/user/:name` 路由，匹配情况如下
 
-|  路径   | 是否匹配  |
-|  ----  | ----  |
-| /user/gordon  | 匹配 |
-| /user/you  | 匹配 |
-| /user/gordon/profile  | 不匹配 |
-|  /user/  | 不匹配 |
+| 路径                 | 是否匹配 |
+| -------------------- | -------- |
+| /user/gordon         | 匹配     |
+| /user/you            | 匹配     |
+| /user/gordon/profile | 不匹配   |
+| /user/               | 不匹配   |
 
 通过使用 `RequestContext.Param` 方法，我们可以获取路由中携带的参数。
 
 示例代码:
+
 ```go
 package main
 
@@ -210,20 +223,22 @@ func main(){
 
 ```
 
-### 通配路由
+### 通配参数路由
+
 Hertz 支持使用 `*path` 这样的通配参数设置路由，并且通配参数会匹配所有内容。
 
-如果我们设置`/src/*path`路由，匹配情况如下
+如果我们设置 `/src/*path` 路由，匹配情况如下
 
-|  路径   | 是否匹配  |
-|  ----  | ----  |
-| /src/  | 匹配 |
-| /src/somefile.go   | 匹配 |
-| /src/subdir/somefile.go  | 不匹配 |
+| 路径                    | 是否匹配 |
+| ----------------------- | -------- |
+| /src/                   | 匹配     |
+| /src/somefile.go        | 匹配     |
+| /src/subdir/somefile.go | 匹配     |
 
 通过使用 `RequestContext.Param` 方法，我们可以获取路由中携带的参数。
 
 示例代码:
+
 ```go
 package main
 
@@ -248,8 +263,8 @@ func main(){
 
 
 ```
-完整用法示例详见 [example](https://github.com/cloudwego/hertz-examples/tree/main/route)
 
+完整用法示例详见 [example](https://github.com/cloudwego/hertz-examples/tree/main/route)
 
 ## 注意
 
@@ -273,13 +288,12 @@ import (
 
 func main() {
 	h := server.Default()
-	h.AnyEX("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, app.GetHandlerName(ctx.Handler()))
+	h.AnyEX("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, app.GetHandlerName(c.Handler()))
 	}, "ping_handler")
 	h.Spin()
 }
 ```
-
 
 ### 获取路由注册信息
 
@@ -316,8 +330,8 @@ import (
 
 func main() {
 	h := server.Default()
-	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
 	})
 	routeInfo := h.Routes()
 	hlog.Info(routeInfo)
@@ -331,6 +345,7 @@ Hertz 提供了 `NoRoute` 与 `NoMethod` 方法用于全局处理 HTTP 404 与 4
 当使用 `NoMethod` 时需要与 `WithHandleMethodNotAllowed` 配合使用。
 
 示例代码：
+
 ```go
 package main
 
@@ -344,19 +359,40 @@ import (
 
 func main() {
 	h := server.Default(server.WithHandleMethodNotAllowed(true))
-	h.POST("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	h.POST("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
 	})
 	// set NoRoute handler
-	h.NoRoute(func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, "no route")
+	h.NoRoute(func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, "no route")
 	})
 	// set NoMethod handler
-	h.NoMethod(func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, "no method")
+	h.NoMethod(func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, "no method")
 	})
 
 	h.Spin()
 }
 
 ```
+
+### 重定向尾斜杠
+
+Hertz 在默认情况下会根据请求 path 末尾的 `/` 自动进行转发。如果 router 中只有 /foo/，那么请求 /foo 会被自动重定向到 /foo/；如果 router 中只有 /foo，那么 /foo/ 会被重定向到 /foo。
+
+这样的请求除 `GET` 以外的请求方法都会触发 `307 Temporary Redirect` 状态码，而 `GET` 请求会触发 `301 Moved Permanently` 状态码。
+
+可以在配置中取消，如下：
+
+```go
+package main
+
+import "github.com/cloudwego/hertz/pkg/app/server"
+
+func main() {
+    h := server.New(server.WithRedirectTrailingSlash(false))
+	...
+}
+```
+
+获取更多配置相关信息：[配置说明](/zh/docs/hertz/reference/config/)

@@ -2,10 +2,11 @@
 title: "Call Option"
 date: 2022-06-20
 weight: 3
-description: >
+keywords: ["Kitex", "Call", "Option"]
+description: Kitex Call Option instructions.
 ---
 
-# Usage
+## Usage
 
 When a client makes an RPC call, it adds an additional Option that takes precedence over client Option and overrides some configurations:
 
@@ -13,31 +14,25 @@ When a client makes an RPC call, it adds an additional Option that takes precede
 resp, err := client.Call(ctx, req, callopt.WithXXX....)
 ```
 
+## Options
 
-
-# Options
-
-#### WithHostPort
+### WithHostPort
 
 ```go
 func WithHostPort(hostport string) Option
 ```
 
-Specifying a specific HostPort directly during this call phase will overwrite the resolver result for direct access. [More](https://www.cloudwego.io/docs/kitex/tutorials/basic-feature/visit_directly/)
+Specifying a specific HostPort directly during this call phase will overwrite the resolver result for direct access. [More](/docs/kitex/tutorials/basic-feature/visit_directly/)
 
-
-
-#### WithURL
+### WithURL
 
 ```go
 func WithURL(url string) Option
 ```
 
-Specifying a specified URL during this call phase to initiate the call. [More](https://www.cloudwego.io/docs/kitex/tutorials/basic-feature/visit_directly/)
+Specifying a specified URL during this call phase to initiate the call. [More](/docs/kitex/tutorials/basic-feature/visit_directly/)
 
-
-
-#### WithTag
+### WithTag
 
 ```go
 func WithTag(key, val string) Option
@@ -49,29 +44,23 @@ Set some meta information for this RPC call, add it in the form of key-value, fo
 resp, err := client.Call(ctx, req,callopt.WithTag("cluster", cluster),callopt.WithTag("idc", idc))
 ```
 
-
-
-#### WithRPCTimeout
+### WithRPCTimeout
 
 ```go
 func WithRPCTimeout(d time.Duration) Option
 ```
 
-Set RPC timeout. [More](https://www.cloudwego.io/docs/kitex/tutorials/basic-feature/timeout/)
+Set RPC timeout. [More](/docs/kitex/tutorials/service-governance/timeout/)
 
-
-
-#### WithConnectTimeout
+### WithConnectTimeout
 
 ```go
 func WithConnectTimeout(d time.Duration) Option
 ```
 
-Set connection timeout. [More](https://www.cloudwego.io/docs/kitex/tutorials/basic-feature/timeout/)
+Set connection timeout. [More](/docs/kitex/tutorials/service-governance/timeout/)
 
-
-
-#### WithHTTPHost
+### WithHTTPHost
 
 ```go
 func WithHTTPHost(host string) Option

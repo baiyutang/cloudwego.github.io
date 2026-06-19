@@ -1,6 +1,6 @@
 ---
-title: "hz 命令行工具"
+title: "hz 代码生成"
 weight: 5
-description: >
-
+keywords: ["hz 代码生成"]
+description: "Hertz 提供的代码生成工具 hz。"
 ---

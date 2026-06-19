@@ -1,14 +1,12 @@
 ---
-title: 'Cooperation'
-linkTitle: 'Cooperation'
+title: "Cooperation"
+linkTitle: "Cooperation"
 menu:
   main:
     weight: 40
 ---
 
-{{< blocks/cover title="谁在使用CloudWeGo" image_anchor="bottom" height="min" >}}
-
-<p class="lead mt-5">CloudWeGo 用户实践案例分享</p>
+{{< blocks/cover title="CloudWeGo Enterprise Use Case" image_anchor="bottom" height="min" >}}
 
 {{< /blocks/cover >}}
 
@@ -20,26 +18,57 @@ menu:
 <div class="row">
 <div class="col-12 col-lg-12">
 <p class="my-3">
-CloudWeGo 是一套由字节跳动开源的、可快速构建企业级云原生架构的中间件集合，专注于微服务通信与治理，具备高性能、高扩展性、高可靠的特点，满足不同业务在不同场景的诉求。
-此外，CloudWeGo 也重视与云原生生态的集成，支持对接主流注册中心、Prometheus 监控以及 OpenTelemetry & OpenTracing 链路追踪等。
-目前 CloudWeGo 已经在诸多企业和相关业务落地，涉及到电商、证券、游戏、企业软件、基础架构等诸多领域，详见下面案例介绍。
+CloudWeGo focuses on real enterprise users with a support and maintenance mechanism. 
+As of now, CloudWeGo has successfully onboarded over 30 enterprise users, encompassing diverse industries such as e-commerce, gaming, finance, and AI. 
+These users range from giant unicorn companies to startups, showcasing a variety in industry sectors and company scales. 
+Across these industries, there's a shared emphasis on microservices architecture and enhancing cost-effectiveness.
 </p>
 
 {{< cardpane >}}
-{{< card header="华兴证券在混合云原生架构下的 Kitex 实践" >}}
-华兴证券是 CloudWeGo 企业用户，使用 Kitex 框架完成混合云部署下的跨机房调用。完成搭建针对 Kitex 的可观测性系统，以及在 K8s 同集群和跨集群下使用 Kitex 的落地实践。<br/><br/>
-<a href='{{< relref "huaxingsec" >}}'>了解更多</a>
+{{< card header="Huaxing Securities' Kitex Practices in a Hybrid Cloud-Native Architecture" img="/img/usedby/huaxing.png">}}
+Huaxing Securities, a CloudWeGo enterprise user, has implemented Kitex framework to enable cross-data center communication within a hybrid cloud-native architecture.
+They've successfully established an observability system tailored for Kitex and conducted practical deployments using Kitex within and across Kubernetes clusters.
+<a href='{{< relref "huaxingsec" >}}'>Learn more</a>
 {{< /card >}}
 
-{{< card header="Kitex 在森马电商场景的落地实践" >}}
-近些年电商行业高速发展，森马电商线上业务激增，面临着高并发、高性能的业务场景需求。森马正式成为 CloudWeGo 的企业用户，通过使用 Kitex 接入 Istio，极大地提高了对高并发需求的处理能力。<br/><br/>
-<a href='{{< relref "semir" >}}'>了解更多</a>
+{{< card header="Kitex Implementation in Semir E-commerce" img="/img/usedby/semir-en.png" >}}
+In recent years, the e-commerce industry has seen rapid growth, and Senma E-commerce's online business has experienced significant expansion, encountering demands for high concurrency and performance in its operations.
+Senma has officially become an enterprise user of CloudWeGo. By integrating Kitex with Istio, Senma significantly enhanced its capabilities to handle high-concurrency requirements.
+<a href='{{< relref "semir" >}}'>Learn more</a>
 {{< /card >}}
 
-{{< card header="飞书管理后台平台化改造的演进史" >}}
-飞书管理后台是飞书套件专为企业管理员提供的信息管理平台，通过引入 Kitex 泛化调用对飞书管理后台进行平台化改造，提供一套统一的标准和通用服务，实现了飞书管理后台作为企业统一数字化管理平台的愿景。<br/><br/>
-<a href='{{< relref "feishu" >}}'>了解更多</a>
+{{< card header="The Evolution of Feishu's Admin Console Platform"  img="/img/usedby/feishu-en.png">}}
+Feishu's admin console is an information management platform tailored for enterprise administrators. Through the integration of Kitex's generalized calling capabilities,
+Feishu's admin console underwent a platform-level transformation, offering a unified set of standards and common services.
+This realization led to the fulfillment of Feishu's vision for the admin console as a unified digital management platform for enterprises.
+<a href='{{< relref "feishu" >}}'>Learn more</a>
 {{< /card >}}
+
+{{< card header="CloudWeGo's Application in Tanwan Game SDK Interface" img="/img/usedby/tanwan.png">}}
+As a gaming company, the previous PHP-based architecture encountered significant performance and stability bottlenecks. 
+After transitioning to Go and implementing CloudWeGo, performance, stability, business flexibility, 
+and development efficiency have all been significantly improved, achieving cost reduction and efficiency enhancement.<br/><br/>
+<a href='{{< relref "tanwan" >}}'>Learn more</a>
+{{< /card >}}
+
+{{< card header="Kitex's Application in Shumei Technology's Usability Governance" img="/img/usedby/ishumei.png">}}
+Shumei Technology primarily provides SaaS services externally and operates as a typical machine learning system internally, facing usability challenges. 
+After implementing the Kitex framework, both usability and stability have been greatly improved.<br/><br/>
+<a href='{{< relref "shumei" >}}'>Learn more</a>
+{{< /card >}}
+
+{{< card header="Founder Securities - Financial Technology Cloud-native Microservices Implementation" img="/img/usedby/foundersc.jpeg">}}
+At the beginning of 2023, Founder Securities initiated the construction of a microservice system, involving microservice governance, observability capabilities, and interface management. 
+The Web and RPC application frameworks adopted CloudWeGo's Hertz and Kitex, respectively.<br/><br/>
+<a href='{{< relref "foundersc" >}}'>Learn more</a>
+{{< /card >}}
+
+{{< card header="Construct's Microservice System Construction from 0 to 1 Based on Kitex + Istio" img="/img/usedby/construct.png">}}
+This article demonstrates Construct Company as an example to explore how they utilized the CloudWeGo framework 
+and Istio service mesh to build an efficient and stable microservice system from scratch.<br/><br/>
+<a href='{{< relref "construct" >}}'>Learn more</a>
+{{< /card >}}
+
 {{< /cardpane >}}
 
 </div>

@@ -2,29 +2,38 @@
 title: "Route"
 date: 2022-09-06
 weight: 2
-description: >
-
+keywords:
+  [
+    "Route",
+    "Route Group",
+    "Static Route",
+    "Parametric Route",
+    "Routing Priority",
+    "NoRoute",
+    "NoMethod",
+  ]
+description: "The routing function provided by Hertz."
 ---
 
 ## Route Registration
 
 Hertz provides methods like `GET`, `POST`, `PUT`, `DELETE`, `ANY` for registering routes.
 
-| Method  | Introduce                                                                                                                                                                                             |
-| ------------ |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|  `Hertz.GET`   | The method used to register the HTTP Method as GET                                                                                                                                                    |
-|  `Hertz.POST` | The method used to register the HTTP Method as POST                                                                                                                                                   |
-|  `Hertz.DELETE` | The method used to register the HTTP Method as DELETE                                                                                                                                                 |
-|  `Hertz.PUT` | The method used to register the HTTP Method as PUT                                                                                                                                                    |
-|  `Hertz.PATCH` | The method used to register the HTTP Method as PATCH                                                                                                                                                  |
-|  `Hertz.HEAD` | The method used to register the HTTP Method as HEAD                                                                                                                                                   |
-|  `Hertz.OPTIONS` | The method used to register the HTTP Method as OPTIONS                                                                                                                                                |
-|  `Hertz.Handle` | The method supports to register a HTTP Method flexibly, which is the same as the above method when used to register a normal HTTP Method, and it also supports the registration of custom HTTP Method |
-|  `Hertz.Any` | The method for registering all HTTP Methods                                                                                                                                                           |
-|  `Hertz.StaticFile/Static/StaticFS` | For registering static files                                                                                                                                                                          |
-
+| Method                             | Introduce                                                                                                                                                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Hertz.GET`                        | The method used to register the HTTP Method as GET                                                                                                                                                    |
+| `Hertz.POST`                       | The method used to register the HTTP Method as POST                                                                                                                                                   |
+| `Hertz.DELETE`                     | The method used to register the HTTP Method as DELETE                                                                                                                                                 |
+| `Hertz.PUT`                        | The method used to register the HTTP Method as PUT                                                                                                                                                    |
+| `Hertz.PATCH`                      | The method used to register the HTTP Method as PATCH                                                                                                                                                  |
+| `Hertz.HEAD`                       | The method used to register the HTTP Method as HEAD                                                                                                                                                   |
+| `Hertz.OPTIONS`                    | The method used to register the HTTP Method as OPTIONS                                                                                                                                                |
+| `Hertz.Handle`                     | The method supports to register a HTTP Method flexibly, which is the same as the above method when used to register a normal HTTP Method, and it also supports the registration of custom HTTP Method |
+| `Hertz.Any`                        | The method for registering all HTTP Methods                                                                                                                                                           |
+| `Hertz.StaticFile/Static/StaticFS` | For registering static files                                                                                                                                                                          |
 
 Sample Code:
+
 ```go
 package main
 
@@ -37,6 +46,9 @@ import (
 
 func main(){
 	h := server.Default(server.WithHostPorts("127.0.0.1:8080"))
+
+	h.StaticFS("/", &app.FS{Root: "./", GenerateIndexPages: true})
+
 	h.GET("/get", func(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusOK, "get")
 	})
@@ -61,7 +73,7 @@ func main(){
 	h.Any("/ping_any", func(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusOK, "any")
 	})
-	h.Handle("Load","/load", func(ctx context.Context, c *app.RequestContext) {
+	h.Handle("LOAD","/load", func(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusOK, "load")
 	})
 	h.Spin()
@@ -73,8 +85,8 @@ func main(){
 
 Hertz provides the capability of `Group`, which are used to support route grouping functionality, and the middleware can also register with `Group`.
 
-
 Sample Code:
+
 ```go
 package main
 
@@ -112,6 +124,7 @@ Use middleware with route group
 The following example uses the `BasicAuth` middleware in a route group.
 
 Sample Code 1:
+
 ```go
 package main
 
@@ -130,14 +143,15 @@ func main() {
 
 	// or use `Use` method
 	//v1.Use(basic_auth.BasicAuth(map[string]string{"test": "test"}))
-	v1.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK,"ping")
+	v1.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK,"ping")
 	})
 	h.Spin()
 }
 ```
 
 Sample Code 2:
+
 ```go
 package main
 
@@ -154,13 +168,12 @@ func main() {
 	v1 := h.Group("/v1")
 	// use `Use` method
 	v1.Use(basic_auth.BasicAuth(map[string]string{"test": "test"}))
-	v1.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK,"ping")
+	v1.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK,"ping")
 	})
 	h.Spin()
 }
 ```
-
 
 ## Route Types
 
@@ -169,23 +182,26 @@ Hertz supports a variety of route types for complex functions, including static 
 Priority of the route: `static route` > `parametric route` > `wildcard route`
 
 ### Static Route
+
 See above for specific examples.
 
 ### Parametric Route
+
 Hertz supports the use of named parameters such as `:name` to set routes, and named parameters match only a single path segment.
 
 If we set the route `/user/:name`, the match is as follows
 
-|  path   |   |
-|  ----  | ----  |
-| /user/gordon  | matched |
-| /user/you  | matched |
-| /user/gordon/profile  | mismatched |
-|  /user/  | mismatched |
+| path                 |            |
+| -------------------- | ---------- |
+| /user/gordon         | matched    |
+| /user/you            | matched    |
+| /user/gordon/profile | mismatched |
+| /user/               | mismatched |
 
 By using the `RequestContext.Param` method, we can get the parameters carried in the route.
 
 Sample Code:
+
 ```go
 package main
 
@@ -210,19 +226,21 @@ func main(){
 ```
 
 ### Wildcard Route
+
 Hertz supports routing with wildcard parameters such as `*filepath`, and the wildcard parameter will match all contents of the current path segment.
 
 If we set the route `/src/*filepath`, the match is as follows
 
-|  path   |   |
-|  ----  | ----  |
-| /src/  | matched |
-| /src/somefile.go   | matched |
-| /src/subdir/somefile.go  | mismatched |
+| path                    |         |
+| ----------------------- | ------- |
+| /src/                   | matched |
+| /src/somefile.go        | matched |
+| /src/subdir/somefile.go | matched |
 
 By using the `RequestContext.Param` method, we can get the parameters carried in the route.
 
 Sample Code:
+
 ```go
 package main
 
@@ -247,6 +265,7 @@ func main(){
 
 
 ```
+
 Refer to the [example](https://github.com/cloudwego/hertz-examples/tree/main/route) for more detailed examples.
 
 ## Note
@@ -258,6 +277,7 @@ When register route with anonymous function or decorator, if we use `RequestCont
 You need to use the `GETEX`, `POSTEX`, `PUTEX`, `DELETEEX`, `HEADEX`, `AnyEX`, `HandleEX` methods provided by Hertz and manually pass in the handler name to register the route. use `app.GetHandlerName` to get the handler name.
 
 Sample Code:
+
 ```go
 package main
 
@@ -270,13 +290,12 @@ import (
 
 func main() {
 	h := server.Default()
-	h.AnyEX("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, app.GetHandlerName(ctx.Handler()))
+	h.AnyEX("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, app.GetHandlerName(c.Handler()))
 	}, "ping_handler")
 	h.Spin()
 }
 ```
-
 
 ### Get route info
 
@@ -313,8 +332,8 @@ import (
 
 func main() {
 	h := server.Default()
-	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
 	})
 	routeInfo := h.Routes()
 	hlog.Info(routeInfo)
@@ -341,19 +360,40 @@ import (
 
 func main() {
 	h := server.Default(server.WithHandleMethodNotAllowed(true))
-	h.POST("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	h.POST("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
 	})
 	// set NoRoute handler
-	h.NoRoute(func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, "no route")
+	h.NoRoute(func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, "no route")
 	})
 	// set NoMethod handler
-	h.NoMethod(func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, "no method")
+	h.NoMethod(func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, "no method")
 	})
 
 	h.Spin()
 }
 
 ```
+
+### Redirect tail slash
+
+By default, Hertz automatically forwards requests based on the `/` at the end of the path. If the router only has `/foo/`, then the request for `/foo` will be automatically redirected to `/foo/`; if the router only has `/foo`, then `/foo/` will be redirected to `/foo`.
+
+The `307 Temporary Redirect` status code is triggered by any of the request methods other than `GET` and the `301 Moved Permanently` status code is triggered by the `GET` request.
+
+You can cancel it in the configuration as follows:
+
+```go
+package main
+
+import "github.com/cloudwego/hertz/pkg/app/server"
+
+func main() {
+    h := server.New(server.WithRedirectTrailingSlash(false))
+	...
+}
+```
+
+For more configuration-related information: [Configuration instruction](/docs/hertz/reference/config/)

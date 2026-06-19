@@ -2,19 +2,19 @@
 title: "Message Types"
 date: 2021-08-26
 weight: 1
-description: >
-  Support PingPong、Oneway、Streaming.
+keywords: ["Kitex", "PingPong", "Oneway", "Streaming"]
+description: Kitex supports message types of PingPong、Oneway、Streaming.
 ---
 
 ## Protocols
 
-The table below is message types, codecs and transports supported by Kitex.
+The table below is message types, serializations and transport protocols supported by Kitex:
 
-|Message Types|Codec| Transport|
-|--------|-------|--------|
-|PingPong|Thrift / Protobuf| [TTHeader](../../../reference/transport_protocol_ttheader) / HTTP2(gRPC) |
-|Oneway|Thrift| [TTHeader](../../../reference/transport_protocol_ttheader)|
-|Streaming|Protobuf| HTTP2(gRPC)|
+| Message Types | Serialization     | Transport Protocol                                                       |
+| ------------- |-------------------|--------------------------------------------------------------------------|
+| PingPong      | Thrift / Protobuf | [TTHeader](../../../reference/transport_protocol_ttheader) / HTTP2(gRPC) |
+| Oneway        | Thrift            | [TTHeader](../../../reference/transport_protocol_ttheader)               |
+| Streaming     | Thrift / Protobuf | HTTP2(gRPC)                                                              |
 
 - PingPong: the client always waits for a response after sending a request
 - Oneway: the client does not expect any response after sending a request
@@ -22,7 +22,9 @@ The table below is message types, codecs and transports supported by Kitex.
 
 ## Thrift
 
-When the codec is thrift, Kitex supports PingPong and Oneway. The streaming on thrift is under development.
+Kitex supports **PingPong** and **Oneway** message types based on Thrift protocol; Simultaneously supporting **Thrift Streaming** over HTTP2. 
+
+The interface definitions for PingPong and Oneway are shown in the following example, and the usage of Thrift Streaming please see [Thrift Streaming](/docs/kitex/tutorials/basic-feature/protocol/streaming/grpc/thrift_streaming/)
 
 ### Example
 
@@ -45,7 +47,7 @@ service EchoService {
 }
 ```
 
-The layout of generated code might be:
+The layout of generated code:
 
 ```
 .
@@ -57,15 +59,18 @@ The layout of generated code might be:
         │   ├── echoservice.go
         │   ├── invoker.go
         │   └── server.go
+        ├── k-consts.go
         └── k-echo.go
 ```
 
-The handler code in server side might be:
+The handler code on server side:
 
 ```go
 package main
 
 import (
+    "context"
+
     "xx/echo"
     "xx/echo/echoservice"
 )
@@ -74,7 +79,7 @@ type handler struct {}
 
 func (handler) Echo(ctx context.Context, req *echo.Request) (r *echo.Response, err error) {
     //...
-    return &echo.Response{ Msg: "world" }
+    return &echo.Response{ Msg: "world" }, err
 }
 
 func (handler) VisitOneway(ctx context.Context, req *echo.Request) (err error) {
@@ -83,61 +88,72 @@ func (handler) VisitOneway(ctx context.Context, req *echo.Request) (err error) {
 }
 
 func main() {
-    svr, err := echoservice.NewServer(handler{})
+    svr := echo.NewServer(handler{})
+	err := svr.Run()
     if err != nil {
         panic(err)
     }
-    svr.Run()
 }
 ```
 
 #### PingPong
 
-The code in client side might be:
+The code on client side:
 
 ```go
 package main
 
 import (
+    "context"
+    "fmt"
+
     "xx/echo"
     "xx/echo/echoservice"
+
+	"github.com/cloudwego/kitex/client"
 )
 
 func main() {
-    cli, err := echoservice.NewClient("destServiceName")
+    cli, err := echoservice.NewClient("destServiceName", client.WithHostPorts("0.0.0.0:8888"))
     if err != nil {
         panic(err)
     }
     req := echo.NewRequest()
     req.Msg = "hello"
-    resp, err := cli.Echo(req)
+    resp, err := cli.Echo(context.Background(), req)
     if err != nil {
         panic(err)
     }
+
+    fmt.Println(resp.Msg)
     // resp.Msg == "world"
 }
 ```
 
 #### Oneway
 
-The code in client side might be:
+The code on client side:
 
 ```go
 package main
 
 import (
+    "context"
+
     "xx/echo"
     "xx/echo/echoservice"
+
+    "github.com/cloudwego/kitex/client"
 )
 
 func main() {
-    cli, err := echoservice.NewClient("destServiceName")
+    cli, err := echoservice.NewClient("destServiceName", client.WithHostPorts("0.0.0.0:8888"))
     if err != nil {
         panic(err)
     }
     req := echo.NewRequest()
     req.Msg = "hello"
-    err = cli.VisitOneway(req)
+    err = cli.VisitOneway(context.Background(), req)
     if err != nil {
         panic(err)
     }
@@ -147,12 +163,12 @@ func main() {
 
 ## Protobuf
 
-Kitex supports two kind of protocols that carries Protobuf payload:
+Kitex supports two kinds of protocols that carry Protobuf payload:
 
 - Kitex Protobuf
-    - Only supports the PingPong type of messages. If any streaming method is defined in the IDL, the protocol will switch to gRPC.
+  - Only supports the PingPong type of messages. If any streaming method is defined in the IDL, the protocol will switch to gRPC.
 - The gRPC Protocol
-    - The protocol that shipped with gRPC.
+  - Be able to interoperate with gRPC. Use the same definition as gRPC service, and supports Unary (PingPong) and Streaming calls.
 
 ### Example
 
@@ -182,13 +198,14 @@ service EchoService {
 }
 ```
 
-The generated code might be:
+The generated code:
 
 ```
 .
 └── kitex_gen
     └── echo
         ├── echo.pb.go
+        ├── echo.pb.fast.go
         └── echoservice
             ├── client.go
             ├── echoservice.go
@@ -196,13 +213,15 @@ The generated code might be:
             └── server.go
 ```
 
-The handler code in server side:
+The handler code on server side:
 
 ```go
 package main
 
 import (
-    "sync"
+	"log"
+	"time"
+    "context"
 
     "xx/echo"
     "xx/echo/echoservice"
@@ -216,6 +235,7 @@ func (handler) ClientSideStreaming(stream echo.EchoService_ClientSideStreamingSe
         if err != nil {
             return err
         }
+        log.Println("received:" , req.GetMsg())
     }
 }
 
@@ -230,37 +250,55 @@ func (handler) ServerSideStreaming(req *echo.Request, stream echo.EchoService_Se
 }
 
 func (handler) BidiSideStreaming(stream echo.EchoService_BidiSideStreamingServer) (err error) {
-    var once sync.Once
+	ctx, cancel := context.WithCancel(context.Background())
+	errChan := make(chan error, 1)
+
 	go func() {
 		for {
-			req, err2 := stream.Recv()
-			log.Println("received:", req.GetMsg())
-			if err2 != nil {
-				once.Do(func() {
-					err = err2
-				})
-				break
+			select {
+			case <- ctx.Done():
+				return
+			default:
+				req,err := stream.Recv()
+				if err != nil {
+					errChan <- err
+					cancel()
+					return
+				}
+				log.Println("received:", req.GetMsg())
 			}
 		}
 	}()
-	for {
-		resp := &echo.Response{Msg: "world"}
-		if err2 := stream.Send(resp); err2 != nil {
-			once.Do(func() {
-				err = err2
-			})
-			return
+	go func() {
+		for {
+			select {
+			case <- ctx.Done():
+				return
+			default:
+				resp := &echo.Response{Msg: "world"}
+				if err := stream.Send(resp); err != nil {
+					errChan <- err
+					cancel()
+					return
+				}
+			}
+			time.Sleep(time.Second)
 		}
-	}
-	return
+	}()
+
+	err = <-errChan
+	cancel()
+	return err
 }
 
 func main() {
-    svr, err := echoservice.NewServer(handler{})
-    if err != nil {
-        panic(err)
-    }
-    svr.Run()
+    svr := echoservice.NewServer(new(handler))
+
+	err := svr.Run()
+
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 ```
 
@@ -272,12 +310,17 @@ ClientSideStreaming:
 package main
 
 import (
+    "context"
+	"time"
+
     "xx/echo"
     "xx/echo/echoservice"
+
+    "github.com/cloudwego/kitex/client"
 }
 
 func main() {
-    cli, err := echoservice.NewClient("destServiceName")
+    cli, err := echoservice.NewClient("destServiceName", client.WithHostPorts("0.0.0.0:8888"))
     if err != nil {
         panic(err)
     }
@@ -290,6 +333,7 @@ func main() {
         if err := cliStream.Send(req); err != nil {
             panic(err)
         }
+        time.Sleep(time.Second)
     }
 
 }
@@ -301,12 +345,18 @@ ServerSideStreaming:
 package main
 
 import (
+    "context"
+	"log"
+	"time"
+
     "xx/echo"
     "xx/echo/echoservice"
+
+    "github.com/cloudwego/kitex/client"
 }
 
 func main() {
-    cli, err := echoseervice.NewClient("destServiceName")
+    cli, err := echoseervice.NewClient("destServiceName", client.WithHostPorts("0.0.0.0:8888"))
     if err != nil {
         panic(err)
     }
@@ -317,9 +367,11 @@ func main() {
     }
     for {
         resp, err := svrStream.Recv()
+        log.Println("response:",resp.GetMsg())
         if err != nil {
             panic(err)
         }
+        time.Sleep(time.Second)
         // resp.Msg == "world"
     }
 
@@ -332,16 +384,21 @@ BidiSideStreaming:
 package main
 
 import (
+    "context"
+	"log"
+	"time"
+
     "xx/echo"
     "xx/echo/echoservice"
+
+    "github.com/cloudwego/kitex/client"
 }
 
 func main() {
-    cli, err := echoseervice.NewClient("destServiceName")
+    cli, err := echoservice.NewClient("destServiceName", client.WithHostPorts("0.0.0.0:8888"))
     if err != nil {
         panic(err)
     }
-    req := &echo.Request{Msg: "hello"}
     bidiStream, err := cli.BidiSideStreaming(context.Background())
     if err != nil {
         panic(err)
@@ -353,6 +410,7 @@ func main() {
             if err != nil {
                 panic(err)
             }
+            time.Sleep(time.Second)
         }
     }()
     for {
@@ -360,6 +418,7 @@ func main() {
         if err != nil {
             panic(err)
         }
+        log.Println(resp.GetMsg())
         // resp.Msg == "world"
     }
 }
